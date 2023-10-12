@@ -10,22 +10,22 @@ let i = 0;
 
 function main(){
 	const ctx = canvas.getContext("2d");
-	setup(ctx);
-	setInterval(() => draw(ctx), 100);
+	setup.call(ctx);
+	setInterval(draw.bind(ctx), 100);
 }
 
 main()
 
-function setup(ctx){
-	ctx.canvas.width  = window.innerWidth;
-	ctx.canvas.height = window.innerHeight
+function setup(){
+	this.canvas.width  = window.innerWidth;
+	this.canvas.height = window.innerHeight
 }
 
 
-function draw(ctx){
-	ctx.beginPath();
-	ctx.arc(window.innerWidth/2 + i, window.innerHeight/2, 10, 0, 2 * Math.PI);
-	ctx.fill()
-	ctx.stroke();
+function draw(){
+	this.beginPath();
+	this.arc(window.innerWidth/2 + i, window.innerHeight/2, 10, 0, 2 * Math.PI);
+	this.fill()
+	this.stroke();
 	i++
 }
