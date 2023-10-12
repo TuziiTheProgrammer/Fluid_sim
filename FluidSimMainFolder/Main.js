@@ -6,10 +6,30 @@ const canvas = document.querySelector("#screen");
 
 canvas.addEventListener("click", () => console.log("Clicked!"))
 
-const ctx = canvas.getContext("2d");
-ctx.canvas.width  = window.innerWidth;
-ctx.canvas.height = window.innerHeight;
-ctx.beginPath();
-ctx.arc(50, 50, 10, 0, 2 * Math.PI);
-ctx.fill()
-ctx.stroke();
+
+
+
+let i = 0;
+
+
+function main(){
+	const ctx = canvas.getContext("2d");
+	setup(ctx);
+	setInterval(() => draw(ctx), 100);
+}
+
+main()
+
+function setup(ctx){
+	ctx.canvas.width  = window.innerWidth;
+	ctx.canvas.height = window.innerHeight
+}
+
+
+function draw(ctx){
+	ctx.beginPath();
+	ctx.arc(50+i, 50, 10, 0, 2 * Math.PI);
+	ctx.fill()
+	ctx.stroke();
+	i++
+}
