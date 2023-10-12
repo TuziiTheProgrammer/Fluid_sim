@@ -1,17 +1,28 @@
 const canvas = document.querySelector("#screen");
 
-canvas.addEventListener("click", () => console.log("Clicked!"))
 
-
-
-
+let x;
+let y;
 let i = 0;
+
+canvas.addEventListener("click", event => {
+
+    i = 0
+    x = event.clientX
+    y = event.clientY
+
+    console.log(x+" , "+y)
+})
 
 
 function main(){
 	const ctx = canvas.getContext("2d");
 	setup.call(ctx);
-	setInterval(draw.bind(ctx), 100);
+	setInterval(() => {
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		draw.call(ctx)
+		i++;
+	}, 60);
 }
 
 main()
@@ -21,11 +32,25 @@ function setup(){
 	this.canvas.height = window.innerHeight
 }
 
+function Circle(x_){
+
+    let change_x = x+i
+    let change_y = y+i
+    x_.beginPath();
+	x_.arc(change_x, y, 10, 0, 2 * Math.PI);
+	x_.fill();
+	x_.stroke();
+
+    if(change_x%window.innerWidth == 0){
+        x_.arc()
+    }
+
+}
+
+
+
 
 function draw(){
-	this.beginPath();
-	this.arc(window.innerWidth/2 + i, window.innerHeight/2, 10, 0, 2 * Math.PI);
-	this.fill()
-	this.stroke();
+	Circle(this)
 	i++
 }
