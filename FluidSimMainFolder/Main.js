@@ -6,11 +6,9 @@ let y;
 let i = 0;
 
 canvas.addEventListener("click", event => {
-
     i = 0
     x = event.clientX
     y = event.clientY
-
     console.log(x+" , "+y)
 })
 
@@ -22,9 +20,8 @@ function main(){
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		draw.call(ctx)
 		i++;
-	}, 60);
+	}, 1000/60);
 }
-
 main()
 
 function setup(){
@@ -41,10 +38,10 @@ function Circle(x_){
 	x_.fill();
 	x_.stroke();
 
-    if(change_x%window.innerWidth == 0){
-        x_.arc()
+    if(change_x > window.innerWidth){
+        x = 0
+        i = 0
     }
-
 }
 
 
