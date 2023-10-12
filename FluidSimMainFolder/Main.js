@@ -1,7 +1,3 @@
-
-
-
-
 const canvas = document.querySelector("#screen");
 
 canvas.addEventListener("click", () => console.log("Clicked!"))
@@ -28,7 +24,7 @@ function setup(ctx){
 
 function draw(ctx){
 	ctx.beginPath();
-	ctx.arc(50+i, 50, 10, 0, 2 * Math.PI);
+	ctx.arc(window.innerWidth/2 + i, window.innerHeight/2, 10, 0, 2 * Math.PI);
 	ctx.fill()
 	ctx.stroke();
 	i++
