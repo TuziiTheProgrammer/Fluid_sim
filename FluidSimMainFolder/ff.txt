@@ -1,0 +1,25 @@
+function Circle(x_){
+
+	let change_x = initial_x+i
+	let change_y = initial_y+i*gravitation
+	let position = [change_x, change_y]
+	
+    x_.beginPath();
+	x_.arc(initial_x, change_y, 10, 0, 2 * Math.PI);
+	x_.fill();
+	x_.stroke();
+
+	
+    if(change_x > window.innerWidth){
+        initial_x = 0
+        i = 0
+    }
+
+	if (change_y > window.innerHeight){
+		
+	}
+}
+function draw(){
+	Circle(this)
+	i++
+}
