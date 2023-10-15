@@ -14,6 +14,7 @@ let ParticleAmount= 10
 let seed = 2
 let SmoothingRadius = 1000
 let Mass = 1
+let pp
 
 
 let cons_Velocity = Dist/time
