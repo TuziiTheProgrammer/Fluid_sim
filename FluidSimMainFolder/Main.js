@@ -79,41 +79,21 @@ function main(){
 		particle.Color = "red"
 		particle.SmoothingRadius = SmoothingRadius
 		
-		//VelocityArr.push(particle.Velocity)
+		VelocityArr.push(particle.Velocity)
 		particleArr.push(particle)
 	});
 
 	
-
-
-	//print(PreProp)
-	/*
-	for(let k = 0; k< ParticleAmount; k++){
-		let density = calculateDesnity(PrePos[k], PrePos)
-		DensityArr[k] = density
-		//let SomeProperty = calculateProperty(particlePos[k], PreProp, PrePos)
-		//let gradiant = CalculatePropertyGradiant(PrePos[k], PreProp, PreProp)
-	}
-	*/
-
-	//console.log("density"+" "+density)
 	setup.call(ctx)
-
-
-	
-
 
 	setInterval(() => {
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-
-		
 		i++;
+
 
 		let timestep = i/100
 
 		///set velocities and gravity and density
-		
 		for(k in particleArr){
 			let particle = particleArr[k]
 			particle.TimeStep = timestep
@@ -128,8 +108,6 @@ function main(){
 			let density = calculateDesnity(particlePos[k])
 			DensityArr[k] = density
 		}
-		
-		
 		///Calcualte Pressures
 		for(k in particleArr){
 			let particle = particleArr[k]
@@ -142,10 +120,7 @@ function main(){
 			VelocityArr[k] = VectorAddWith_S_Multiplier(VelocityArr[k], VectorScalarMultp(pressAcceleration, pressMul*particle.TimeStep), 1)
 
 		}
-		
-		
 		///Update Positions loops over each particle to add some rules
-		
 		for(let k in particleArr){
 			//StoredParticle = particleArr[k]
 			let current_Part = particleArr[k]
