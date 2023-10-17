@@ -19,11 +19,12 @@ class Particle{
 
 
     constructor(canvas_, Tcanvas){
+        this.Type == "Particle"
         this.#Tcanvas = Tcanvas
         this.Position = {x: innerWidth/2, y: innerHeight/2}
         this.#canvas = canvas_
         this.TimeStep = NaN
-        this.Velocity = {v1: NaN, v2:NaN}
+        this.Velocity = {x: 0, y: 0}
         this.Size = 5
         this.Force = 9.8;
         this.Mass = 1;
@@ -33,6 +34,15 @@ class Particle{
         this.SmoothingRadius = 1
         this.ParticleDensityArea = 0
         this.Instanced = false
+        this.ForceX = 2
+        this.PressAccX = 1
+        this.PressAccy = 1
+
+
+
+        this.VelocityTable = [this.ForceX, this.Force]
+       
+        
         
     }
 
@@ -54,6 +64,12 @@ class Particle{
 	    _.fill();
 	    _.stroke();
     }
+
+
+    setVelocity(velocityVec){
+        this.Velocity = velocityVec
+    }
+
 
     getVelocity(lastPos, ignoredforces){
         this.#lastPos = lastPos
