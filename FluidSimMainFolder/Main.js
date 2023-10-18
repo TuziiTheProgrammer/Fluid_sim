@@ -10,12 +10,12 @@ let initial_x;
 let initial_y;
 let Dist = 1000;
 let time = 60;
-let ParticleAmount =  100
+let ParticleAmount = 10
 let seed = 2
-let SmoothingRadius = 500
-let Mass = 10
-let pressMul = .5
-let TargetDensity = -1
+let SmoothingRadius = 50
+let Mass = 1
+let pressMul = .3
+let TargetDensity = 1
 let Acceleration = 0.01
 
 
@@ -54,7 +54,6 @@ function main(){
 
 	///Statics
 	let CenterofAll = newVector(null, window.innerWidth/2, window.innerHeight/2)
-	let StoredParticle
 	
 	///Sets where they will spawn
 	for(let i = 0; i< ParticleAmount; i++){
@@ -90,6 +89,7 @@ function main(){
 	
 	setup.call(ctx)
 
+	///Frames start here
 	setInterval(() => {
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		i++;
@@ -115,9 +115,6 @@ function main(){
 			particle.Density = density
 			DensityArr[k] = particle.Density
 		}
-
-		console.log(DensityArr)
-
 		///Calcualte Pressures
 		for(k in particleArr){
 			let particle = particleArr[k]
@@ -129,10 +126,8 @@ function main(){
 			let pressAcceleration = VectorScalarMultp(particle.PressForce, 1/particle.Density)
 		
 
-			particle.ForceX +=pressAcceleration.x
-			particle.Force +=pressAcceleration.y
-			
-			//VelocityArr[k] = VectorAddWith_S_Multiplier(VelocityArr[k], VectorScalarMultp(pressAcceleration, particle.TimeStep), 1)
+			particle.ForceX =pressAcceleration.x
+			particle.Force =pressAcceleration.y
 
 		}
 		///Update Positions loops over each particle to add some rules
@@ -150,8 +145,6 @@ function main(){
 
 		}
 	}, cons_Velocity);
-
-
 }
 main()
 
@@ -162,7 +155,7 @@ function setup(){
 }
 function CollisionResponse(Particle){
 	let current_Part = Particle
-	if(current_Part.Position.y > window.innerHeight || current_Part.Position.y < 0){
+	if(current_Part.Position.y > window.innerHeight/3 || current_Part.Position.y < 0){
 				if(current_Part.Position.y > window.innerHeight){
 					current_Part.Position.y = window.innerHeight
 					
@@ -171,7 +164,7 @@ function CollisionResponse(Particle){
 				}
 				current_Part.Force*=-1*current_Part.DampingRate
 			}
-			if(current_Part.Position.x > window.innerWidth || current_Part.Position.x < 0){
+			if(current_Part.Position.x > window.innerWidth/3 || current_Part.Position.x < 0){
 				if(current_Part.Position.x > window.innerWidth){
 					current_Part.Position.x = window.innerWidth
 					
@@ -300,34 +293,35 @@ function CalculatePropertyGradiant(point, propertyArray, Positions){
 		}
 	}
 }
-function CalculatePressureGradiant(pointIndex){
+function CalculatePressureGradiant(pointIndex) {
+    let pressureGrad = newVector(null, 0, 0);
 
-	let pressureGrad = newVector(null, 0,0)
+   
+    let particlePosPoint = particlePos[pointIndex];
 
-	for (const k in particlePos) {
-		let xpos2 = particlePos[k].x
-		let ypos2 = particlePos[k].y
-		
-		if(pointIndex == k){
-			continue;
-		}
-		let dist = distanceCalc(particlePos[pointIndex].x,  particlePos[pointIndex].y, xpos2, ypos2)
+    for (let k in particleArr) {
+        if (k == pointIndex) {
+            continue;
+        }
 
-		if(dist >= 0){
-			let dir = dist == 0 ? RandDirection() : VectorSubtractWith_S_Multipler(particlePos[pointIndex], particlePos[k], 1/dist) 
-			
-			
+        let particleNeighbor = particleArr[k];
+        let particlePosNeighbor = particlePos[k];
 
-			let slope = smoothKernalDerv(particleArr[k].SmoothingRadius, dist)
-			let density = particleArr[k].Density
-			
-			
-			pressureGrad = VectorScalarMultp(VectorAddWith_S_Multiplier(pressureGrad, dir), -convertDensity(density)*slope*(Mass/density))
-			
-		}
-	}
+        let dist = distanceCalc(particlePosPoint.x, particlePosPoint.y, particlePosNeighbor.x, particlePosNeighbor.y);
 
-	return pressureGrad
+		console.log(dist)
+
+        if (dist <= SmoothingRadius) { // Ensure the particle is within the smoothing radius.
+            let dir = dist === 0 ? RandDirection() : VectorSubtractWith_S_Multipler(particlePosPoint, particlePosNeighbor, 1 / dist);
+            let slope = smoothKernalDerv(particleNeighbor.SmoothingRadius, dist);
+            let density = particleNeighbor.Density;
+
+            let pressureForce = VectorScalarMultp(dir, -convertDensity(density) * slope * (Mass / density));
+            pressureGrad = VectorAddWith_S_Multiplier(pressureGrad, pressureForce, 1);
+        }
+    }
+
+    return pressureGrad;
 }
 function VectorSubtractWith_S_Multipler(vecy, vecx, multiply){
 
