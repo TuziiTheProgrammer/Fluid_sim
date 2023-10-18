@@ -29,7 +29,8 @@ class Particle{
         this.Force = 9.8;
         this.Mass = 1;
         this.Acceleration = 3
-        this.DampingRate = 1
+        this.DampingRate = 0.5
+        this.Density = 1
         this.Color = "blue"
         this.SmoothingRadius = 1
         this.ParticleDensityArea = 0
@@ -37,6 +38,7 @@ class Particle{
         this.ForceX = 2
         this.PressAccX = 1
         this.PressAccy = 1
+        this.PressForce = {x: 0, y: 0}
 
 
 
@@ -80,10 +82,6 @@ class Particle{
         this.Velocity = VelocityArr
         return VelocityArr
     }
-
-
-   
-    
 }
 
 

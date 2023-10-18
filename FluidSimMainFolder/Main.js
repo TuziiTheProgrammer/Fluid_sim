@@ -5,18 +5,18 @@ const ctx = canvas.getContext("2d");
 const blurContext = blurCanvas.getContext('2d');
 
 let gravitation = -0;
-let period = 4
+let period = 0
 let initial_x;
 let initial_y;
 let Dist = 1000;
 let time = 60;
-let ParticleAmount= 30
+let ParticleAmount =  100
 let seed = 2
-let SmoothingRadius = 1000
-let Mass = 5
-let pressMul = 2
-let TargetDensity = 1
-
+let SmoothingRadius = 500
+let Mass = 10
+let pressMul = .5
+let TargetDensity = -1
+let Acceleration = 0.01
 
 
 let cons_Velocity = Dist/time
@@ -63,26 +63,30 @@ function main(){
 		let y = randomNumber(seed)*window.innerHeight/2
 
 		PrePos[i] = newVector(null, x, y)
-		PreProp[i] = BackgroundMap(PrePos[i])
-
-		
+		PreProp[i] = BackgroundMap(PrePos[i])		
 	}
 
 	///Builds the Particles in Array
 	PrePos.forEach(element => {
+
 		let particle = new Particle(ctx, canvas)
 		let StartingPos = element
 		particle.Position = StartingPos
 		particle.Force = 1
+		particle.ForceX = 1
 		particle.Mass = Mass
 		particle.Size = ParticleSize
-		particle.Color = "red"
+		particle.Color = "orange"
+		particle.Acceleration = Acceleration
 		particle.SmoothingRadius = SmoothingRadius
+		particle.density = calculateDesnity(particle.Position)
 		
 		VelocityArr.push(particle.Velocity)
 		particleArr.push(particle)
-	});
+		particlePos.push(particle.Position)
+		DensityArr.push(particle.density)
 
+	});
 	
 	setup.call(ctx)
 
@@ -90,58 +94,72 @@ function main(){
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 		i++;
 
-
 		let timestep = i/100
 
 		///set velocities and gravity and density
 		for(k in particleArr){
+
 			let particle = particleArr[k]
 			particle.TimeStep = timestep
 			particlePos[k] = particle.Position
+			
 
 			let VelocityInX = particle.ForceX + particle.Acceleration*particle.TimeStep*gravitation
 			let VelocityInY = particle.Force + particle.Acceleration*particle.TimeStep*gravitation
 			VelocityArr[k] = newVector(null, VelocityInX, VelocityInY)
 			particle.setVelocity(VelocityArr[k])
 
+			
 
 			let density = calculateDesnity(particlePos[k])
-			DensityArr[k] = density
+			particle.Density = density
+			DensityArr[k] = particle.Density
 		}
+
+		console.log(DensityArr)
+
 		///Calcualte Pressures
 		for(k in particleArr){
 			let particle = particleArr[k]
 			particle.TimeStep = timestep
-			
 			let pressureForce = CalculatePressureGradiant(k)
-
-			let pressAcceleration = VectorScalarMultp(pressureForce, 1/DensityArr[k])
 			
-			VelocityArr[k] = VectorAddWith_S_Multiplier(VelocityArr[k], VectorScalarMultp(pressAcceleration, pressMul*particle.TimeStep), 1)
+			particle.PressForce = pressureForce
+
+			let pressAcceleration = VectorScalarMultp(particle.PressForce, 1/particle.Density)
+		
+
+			particle.ForceX +=pressAcceleration.x
+			particle.Force +=pressAcceleration.y
+			
+			//VelocityArr[k] = VectorAddWith_S_Multiplier(VelocityArr[k], VectorScalarMultp(pressAcceleration, particle.TimeStep), 1)
 
 		}
 		///Update Positions loops over each particle to add some rules
 		for(let k in particleArr){
-			//StoredParticle = particleArr[k]
 			let current_Part = particleArr[k]
-			let LastPos__ = current_Part.Position
+		
 			current_Part.TimeStep = timestep
 			current_Part.makeParticle()
+
 			particlePos[k] = current_Part.Position
 			
 			current_Part.Position = newVector(current_Part, current_Part.Velocity.x, current_Part.Velocity.y)
 			
-			CollisionResponse(current_Part)		
+			CollisionResponse(current_Part)
+
 		}
 	}, cons_Velocity);
-}
 
+
+}
 main()
+
+/////Funcitons Etc
 function setup(){
 	this.canvas.width  = window.innerWidth;
 	this.canvas.height = window.innerHeight
 }
-
 function CollisionResponse(Particle){
 	let current_Part = Particle
 	if(current_Part.Position.y > window.innerHeight || current_Part.Position.y < 0){
@@ -185,10 +203,9 @@ function distanceCalc(pos_1x, pos_1y, pos_2x, pos_2y){
 function smoothKernalThingy(radius, dist){
 	let Volume = Math.PI * Math.pow(radius, 8)/4
 	let Val = Math.max(0, (radius * radius) - (dist*dist))
-	return Val * Val * Val / Volume
+	return (Val * Val * Val) / Volume
 }
 function smoothKernalDerv(radius, dist){
-
 	if(dist>=radius){return 0}
 	let f = Math.pow(radius, 2)-Math.pow(dist, 2)
 	let f_ = -24/(Math.PI * Math.pow(radius, 8))
@@ -198,27 +215,22 @@ function calculateDesnity(somePoint){
 	let density = 0
 	let mass = Mass || 1
 
-	for (const k in particlePos) {
-
-		let position = particlePos[k]
-
+	particlePos.forEach(position => {
 		let xpos_2 = position.x
 		let ypos_2 = position.y
-		
-		
-
+	
 		let distance = distanceCalc(somePoint.x,somePoint.y, xpos_2, ypos_2)
 		
 		if(distance >= 0){
 			
 			let influence = smoothKernalThingy(SmoothingRadius, distance)
 			
-			
 			if(influence >= 0){
 				density+= mass*influence
 			}
+
 		}
-	}
+	});
 	return density
 }
 function calculateProperty(point, propertyArray, Positions){
@@ -262,7 +274,6 @@ function newVector(particle_ ,new_x, new_y){
 	if (particle_ == null){
 		return {x: new_x, y: new_y}
 	}else if(particle_ instanceof Particle){
-
 		return {x:particle_.Position.x + new_x, y:particle_.Position.y + new_y}
 	}else{
 		return {x:particle_.x + new_x, y:particle_.y + new_y}
@@ -307,18 +318,14 @@ function CalculatePressureGradiant(pointIndex){
 			
 			
 
-			let slope = smoothKernalDerv(SmoothingRadius, dist)
-			let density = DensityArr[k]
+			let slope = smoothKernalDerv(particleArr[k].SmoothingRadius, dist)
+			let density = particleArr[k].Density
 			
 			
-			pressureGrad = VectorScalarMultp(VectorAddWith_S_Multiplier(pressureGrad, dir), -convertDensity(density)*slope*Mass/density)
+			pressureGrad = VectorScalarMultp(VectorAddWith_S_Multiplier(pressureGrad, dir), -convertDensity(density)*slope*(Mass/density))
 			
 		}
 	}
-
-	//console.log(pressureGrad)
-
-	
 
 	return pressureGrad
 }
@@ -370,4 +377,4 @@ function print(w){
 }
 function wait(s) {
 	return new Promise(resolve => setTimeout(resolve, s*1000));
- }
+}
