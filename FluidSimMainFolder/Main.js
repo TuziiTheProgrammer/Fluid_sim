@@ -14,12 +14,12 @@ let time = 60;
 let ParticleAmount = 250
 let seed = 2
 let SmoothingRadius = 25
-let Mass = 10
+let Mass = 30
 let pressMul = .2
-let TargetDensity = 2
+let TargetDensity = 1
 let Acceleration = 0.01
 let radius_ = 100
-let Strength_ = 10
+let Strength_ = 15
 
 
 let cons_Velocity = Dist/time
@@ -34,13 +34,26 @@ let PreProp = []
 let DensityArr = []
 let VelocityArr = []
 let wheremouseat = newVector(null,0,0)
+let whereMouseHold = newVector(null, 0, 0)
+let MouseDown = false
+let MouseMoving = false
 
 canvas.addEventListener("pointermove", event => {
-
-	//console.log(event.clientX +" "+ event.clientY)
-
 	wheremouseat = newVector(null, event.clientX, event.clientY)
+	MouseMoving = true
    
+})
+
+canvas.addEventListener("mousedown", event =>{
+	MouseDown = true
+	MouseMoving = false
+	whereMouseHold = newVector(null, event.clientX, event.clientY)
+
+})
+
+canvas.addEventListener("mouseup", even =>{
+	MouseDown = false
+	MouseMoving = true
 })
 
 
@@ -65,8 +78,8 @@ function main(){
 		let particle = new Particle(ctx, canvas)
 		let StartingPos = element
 		particle.Position = StartingPos
-		particle.Force = 1
-		particle.ForceX = 1
+		particle.Force = 0
+		particle.ForceX = 0
 		particle.Mass = Mass
 		particle.Size = ParticleSize
 		particle.Color = 'rgb(0, 191, 255)'
@@ -111,11 +124,18 @@ function main(){
 			let particle = particleArr[k]
 			particle.TimeStep = timestep
 			let pressureForce = CalculatePressureGradiant(k)
+			let IntForce
 			
 			particle.PressForce = pressureForce
 
 			let pressAcceleration = VectorScalarMultp(particle.PressForce, 1/particle.Density)
-			let IntForce = InteractionForce(wheremouseat, radius_, Strength_, k)
+
+			if(MouseDown == true){
+				IntForce = InteractionForce(wheremouseat, radius_, Strength_*3, k, -1)
+
+			}else{
+				IntForce = InteractionForce(wheremouseat, radius_, Strength_, k, 1)
+			}
 
 			particle.ForceX+=pressAcceleration.x + IntForce.x
 			particle.Force +=pressAcceleration.y + IntForce.y
@@ -129,15 +149,13 @@ function main(){
 			current_Part.makeParticle()
 
 			particlePos[k] = current_Part.Position
-
-			let IntForce = InteractionForce(wheremouseat, radius_, Strength_, k)
 			
 			current_Part.Position = newVector(current_Part, current_Part.Velocity.x, current_Part.Velocity.y)
 
 			
 			
 			CollisionResponse(current_Part)
-			velocityColorGrad(current_Part)
+			adjustColorBySpeed(current_Part, 0, 15)
 			
 
 		}
@@ -155,27 +173,76 @@ function velocityColorGrad(particle){
 	let convertToColor = {x:191 - 10*particle.Force, y: 1}
 	particle.Color = `rgb(0, ${convertToColor.x}, 255`;
 }
-function InteractionForce(input, radius, strength, particleIndex){
+function InteractionForce(input, radius, strength, particleIndex, switch_){
 	let interactionForce = newVector(null, 0, 0)
 	let offset = VectorSubtractWith_S_Multipler(input, particlePos[particleIndex], 1) 
 	let sqrDIST = VectorDot(offset, offset)
 
 	
-
+	
 	if(sqrDIST < radius*radius){
 		let dst = Math.sqrt(sqrDIST)
-		let dirtoInp = dst <= Number.EPSILON ? newVector(null, 0, 0) : VectorScalarMultp(offset, 1/dst)
+		let dirtoInp = dst <= Number.EPSILON ? newVector(null, 0, 0) : VectorScalarMultp(offset, switch_*1/dst)
 
 		console.log(dirtoInp)
 
 		let center = 1-dst/radius
 
 		interactionForce = VectorSubtractWith_S_Multipler(VelocityArr[particleIndex],VectorScalarMultp(dirtoInp, strength), center)
-		
-
 	}
+
+	
 	return interactionForce
 }
+
+
+function adjustColorBySpeed(particle, minSpeed, maxSpeed) {
+    // Get the particle's velocity
+    const velocity = Math.sqrt(particle.Velocity.x ** 2 + particle.Velocity.y ** 2);
+
+    // Map the velocity to a heat map color gradient
+    const color = mapSpeedToHeatMapColor(velocity, minSpeed, maxSpeed);
+
+    // Set the particle's color based on the gradient
+    particle.Color = color;
+    // Update the particle's visual representation as needed
+}
+function mapSpeedToHeatMapColor(speed, minSpeed, maxSpeed) {
+    const colorStops = [
+        { speed: minSpeed, color: [0, 191, 255] },    
+        { speed: maxSpeed, color: [255, 165, 0] }    
+    ];
+
+    if (speed <= minSpeed) {
+        return rgbToHex(colorStops[0].color);
+    }
+    if (speed >= maxSpeed) {
+        return rgbToHex(colorStops[1].color);
+    }
+
+    // Find the appropriate color stop based on speed
+    for (let i = 0; i < colorStops.length - 1; i++) {
+        const startStop = colorStops[i];
+        const endStop = colorStops[i + 1];
+
+        if (speed >= startStop.speed && speed <= endStop.speed) {
+            const t = (speed - startStop.speed) / (endStop.speed - startStop.speed);
+            const r = interpolate(startStop.color[0], endStop.color[0], t);
+            const g = interpolate(startStop.color[1], endStop.color[1], t);
+            const b = interpolate(startStop.color[2], endStop.color[2], t);
+            return rgbToHex([Math.round(r), Math.round(g), Math.round(b)]);
+        }
+    }
+
+    return rgbToHex(colorStops[0].color); 
+}
+function interpolate(start, end, t) {
+    return start + (end - start) * t;
+}
+function rgbToHex(rgbArray) {
+    return `#${rgbArray.map(component => component.toString(16).padStart(2, '0')).join('')}`;
+}
+
 
 function CollisionResponse(Particle){
 	let current_Part = Particle
