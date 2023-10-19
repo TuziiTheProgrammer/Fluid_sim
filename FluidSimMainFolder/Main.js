@@ -3,6 +3,7 @@ const blurCanvas = document.createElement('canvas');
 const viewPos = document.querySelector("Position")
 const ctx = canvas.getContext("2d");
 const blurContext = blurCanvas.getContext('2d');
+const worker = new Worker("worker.js")
 
 let gravitation = -0;
 let period = 0
@@ -10,13 +11,15 @@ let initial_x;
 let initial_y;
 let Dist = 1000;
 let time = 60;
-let ParticleAmount = 10
+let ParticleAmount = 250
 let seed = 2
-let SmoothingRadius = 50
-let Mass = 1
-let pressMul = .3
-let TargetDensity = 1
+let SmoothingRadius = 25
+let Mass = 10
+let pressMul = .2
+let TargetDensity = 2
 let Acceleration = 0.01
+let radius_ = 100
+let Strength_ = 10
 
 
 let cons_Velocity = Dist/time
@@ -30,25 +33,16 @@ let PrePos = []
 let PreProp = []
 let DensityArr = []
 let VelocityArr = []
+let wheremouseat = newVector(null,0,0)
 
-/*
-canvas.addEventListener("click", event => {
-    initial_x = event.clientX
-    initial_y = event.clientY
+canvas.addEventListener("pointermove", event => {
 
-	let new_particle = new Particle(ctx, canvas)
-	new_particle.Color = "red"
-	new_particle.Size = ParticleSize
-	
-	
+	//console.log(event.clientX +" "+ event.clientY)
 
-	new_particle.Position = {x:event.clientX, y:event.clientY}
-
-	particleArr.push(new_particle)
-	i = 0
-	console.log(initial_x+" , "+initial_y)
+	wheremouseat = newVector(null, event.clientX, event.clientY)
+   
 })
-*/
+
 
 function main(){
 
@@ -75,7 +69,7 @@ function main(){
 		particle.ForceX = 1
 		particle.Mass = Mass
 		particle.Size = ParticleSize
-		particle.Color = "orange"
+		particle.Color = 'rgb(0, 191, 255)'
 		particle.Acceleration = Acceleration
 		particle.SmoothingRadius = SmoothingRadius
 		particle.density = calculateDesnity(particle.Position)
@@ -96,27 +90,24 @@ function main(){
 
 		let timestep = i/100
 
-		///set velocities and gravity and density
-		for(k in particleArr){
+		///set velocities and gravity and density	
+		for(let k in particleArr){
 
 			let particle = particleArr[k]
 			particle.TimeStep = timestep
 			particlePos[k] = particle.Position
 			
-
 			let VelocityInX = particle.ForceX + particle.Acceleration*particle.TimeStep*gravitation
 			let VelocityInY = particle.Force + particle.Acceleration*particle.TimeStep*gravitation
 			VelocityArr[k] = newVector(null, VelocityInX, VelocityInY)
 			particle.setVelocity(VelocityArr[k])
-
-			
 
 			let density = calculateDesnity(particlePos[k])
 			particle.Density = density
 			DensityArr[k] = particle.Density
 		}
 		///Calcualte Pressures
-		for(k in particleArr){
+		for(let k in particleArr){
 			let particle = particleArr[k]
 			particle.TimeStep = timestep
 			let pressureForce = CalculatePressureGradiant(k)
@@ -124,10 +115,10 @@ function main(){
 			particle.PressForce = pressureForce
 
 			let pressAcceleration = VectorScalarMultp(particle.PressForce, 1/particle.Density)
-		
+			let IntForce = InteractionForce(wheremouseat, radius_, Strength_, k)
 
-			particle.ForceX =pressAcceleration.x
-			particle.Force =pressAcceleration.y
+			particle.ForceX+=pressAcceleration.x + IntForce.x
+			particle.Force +=pressAcceleration.y + IntForce.y
 
 		}
 		///Update Positions loops over each particle to add some rules
@@ -138,10 +129,16 @@ function main(){
 			current_Part.makeParticle()
 
 			particlePos[k] = current_Part.Position
+
+			let IntForce = InteractionForce(wheremouseat, radius_, Strength_, k)
 			
 			current_Part.Position = newVector(current_Part, current_Part.Velocity.x, current_Part.Velocity.y)
+
+			
 			
 			CollisionResponse(current_Part)
+			velocityColorGrad(current_Part)
+			
 
 		}
 	}, cons_Velocity);
@@ -153,9 +150,36 @@ function setup(){
 	this.canvas.width  = window.innerWidth;
 	this.canvas.height = window.innerHeight
 }
+function velocityColorGrad(particle){
+
+	let convertToColor = {x:191 - 10*particle.Force, y: 1}
+	particle.Color = `rgb(0, ${convertToColor.x}, 255`;
+}
+function InteractionForce(input, radius, strength, particleIndex){
+	let interactionForce = newVector(null, 0, 0)
+	let offset = VectorSubtractWith_S_Multipler(input, particlePos[particleIndex], 1) 
+	let sqrDIST = VectorDot(offset, offset)
+
+	
+
+	if(sqrDIST < radius*radius){
+		let dst = Math.sqrt(sqrDIST)
+		let dirtoInp = dst <= Number.EPSILON ? newVector(null, 0, 0) : VectorScalarMultp(offset, 1/dst)
+
+		console.log(dirtoInp)
+
+		let center = 1-dst/radius
+
+		interactionForce = VectorSubtractWith_S_Multipler(VelocityArr[particleIndex],VectorScalarMultp(dirtoInp, strength), center)
+		
+
+	}
+	return interactionForce
+}
+
 function CollisionResponse(Particle){
 	let current_Part = Particle
-	if(current_Part.Position.y > window.innerHeight/3 || current_Part.Position.y < 0){
+	if(current_Part.Position.y > window.innerHeight || current_Part.Position.y < 0){
 				if(current_Part.Position.y > window.innerHeight){
 					current_Part.Position.y = window.innerHeight
 					
@@ -164,7 +188,7 @@ function CollisionResponse(Particle){
 				}
 				current_Part.Force*=-1*current_Part.DampingRate
 			}
-			if(current_Part.Position.x > window.innerWidth/3 || current_Part.Position.x < 0){
+			if(current_Part.Position.x > window.innerWidth || current_Part.Position.x < 0){
 				if(current_Part.Position.x > window.innerWidth){
 					current_Part.Position.x = window.innerWidth
 					
@@ -309,18 +333,16 @@ function CalculatePressureGradiant(pointIndex) {
 
         let dist = distanceCalc(particlePosPoint.x, particlePosPoint.y, particlePosNeighbor.x, particlePosNeighbor.y);
 
-		console.log(dist)
-
         if (dist <= SmoothingRadius) { // Ensure the particle is within the smoothing radius.
-            let dir = dist === 0 ? RandDirection() : VectorSubtractWith_S_Multipler(particlePosPoint, particlePosNeighbor, 1 / dist);
-            let slope = smoothKernalDerv(particleNeighbor.SmoothingRadius, dist);
-            let density = particleNeighbor.Density;
-
-            let pressureForce = VectorScalarMultp(dir, -convertDensity(density) * slope * (Mass / density));
-            pressureGrad = VectorAddWith_S_Multiplier(pressureGrad, pressureForce, 1);
+			let dir = dist === 0 ? RandDirection() : VectorSubtractWith_S_Multipler(particlePosPoint, particlePosNeighbor, 1 / dist);
+        	let slope = smoothKernalDerv(particleNeighbor.SmoothingRadius, dist);
+        	let density = particleNeighbor.Density;
+			
+       	 	let pressureForce = VectorScalarMultp(dir, -convertDensity(density) * slope * (Mass / density));
+       	 	pressureGrad = VectorAddWith_S_Multiplier(pressureGrad, pressureForce, 1);
+        	
         }
     }
-
     return pressureGrad;
 }
 function VectorSubtractWith_S_Multipler(vecy, vecx, multiply){
@@ -342,6 +364,9 @@ function VectorScalarMultp(vector, scalars){
 	let x_comp = vector.x
 	let y_comp = vector.y
 	return newVector(null, x_comp*scalars, y_comp*scalars)
+}
+function VectorDot(vec1, vec2){
+	return vec1.x*vec2.x + vec1.y*vec2.y
 }
 function RandDirection(){
 
