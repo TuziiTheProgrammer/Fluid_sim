@@ -1,30 +1,60 @@
+/*
+
+
+	Course: Interaction Design
+	University: Malmo university
+
+	TITLE: Particle fluid simulation
+	MADE BY: JEREMIAH LASSEN-HOLM
+
+	If youre wondering why this doesnt look like the template its because I wasnt aware there was a template
+	and buildt everything from scratch. MY BAD!!!!
+
+
+*/
 const canvas = document.querySelector("#screen");
 const blurCanvas = document.createElement('canvas');
 const viewPos = document.querySelector("Position")
 const ctx = canvas.getContext("2d");
-const blurContext = blurCanvas.getContext('2d');
-const worker = new Worker("worker.js")
+const blurContext = blurCanvas.getContext('2d');// also useless for now 
+const worker = new Worker("worker.js") // useless and was a pain to use. with there was just proper multithreading
 
-let gravitation = -0;
+
 let period = 0
 let initial_x;
 let initial_y;
 let Dist = 1000;
 let time = 60;
-let ParticleAmount = 250
 let seed = 2
+
+///TWEEKABLE THINGS    DO NOT TWEEK ANYTHING ELSE YOU WILL MESS UP THE CODE AND THE CONSOLE WILL SCREAM AT YOU :))))))))))
+let gravitation = -0;
+let ParticleAmount = 300
 let SmoothingRadius = 25
-let Mass = 30
-let pressMul = .2
-let TargetDensity = 1
+let Mass = 10
+let pressMul = 0.5
+let TargetDensity = .5
 let Acceleration = 0.01
 let radius_ = 100
 let Strength_ = 15
+let ParticleSize = 5;
+/////////
 
+/*
+
+	IF YOU DONT LIKE THE PARTICLES STATIC WHEN RUN GO TO "Bulids Particle Array(line 84)" AND CHANGE THE FORCES :))))) THOSE WILL
+	BE THE VECTORS. CURRENTLY TO LAZY TO ADD IN UI FOR RUNTIME TWEEKING BUT I EVENTUALLY WILL.
+
+
+	HAVE FUN TWEEKING STUFF TO YOUR LIKING. ADDING MOE PARTICLES MAKES THE VISUALIZATION BETTER BUT MAYBE LAPTOP IS TOO
+	POTATOE TO RUN MORE THAN 400 SADLY.
+
+
+*/
 
 let cons_Velocity = Dist/time
 let i = 0;
-let ParticleSize = 5;
+
 
 
 let particleArr = []
@@ -43,20 +73,18 @@ canvas.addEventListener("pointermove", event => {
 	MouseMoving = true
    
 })
-
 canvas.addEventListener("mousedown", event =>{
 	MouseDown = true
 	MouseMoving = false
 	whereMouseHold = newVector(null, event.clientX, event.clientY)
 
 })
-
 canvas.addEventListener("mouseup", even =>{
 	MouseDown = false
 	MouseMoving = true
 })
 
-
+///Where everything happens
 function main(){
 
 	///Statics
@@ -194,8 +222,6 @@ function InteractionForce(input, radius, strength, particleIndex, switch_){
 	
 	return interactionForce
 }
-
-
 function adjustColorBySpeed(particle, minSpeed, maxSpeed) {
     // Get the particle's velocity
     const velocity = Math.sqrt(particle.Velocity.x ** 2 + particle.Velocity.y ** 2);
@@ -242,8 +268,6 @@ function interpolate(start, end, t) {
 function rgbToHex(rgbArray) {
     return `#${rgbArray.map(component => component.toString(16).padStart(2, '0')).join('')}`;
 }
-
-
 function CollisionResponse(Particle){
 	let current_Part = Particle
 	if(current_Part.Position.y > window.innerHeight || current_Part.Position.y < 0){
