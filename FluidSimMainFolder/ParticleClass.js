@@ -6,7 +6,7 @@ function newVector( particle_ ,new_x, new_y){
 	return {x:particle_.Position.x + new_x, y:particle_.Position.y + new_y}
 }
 
-let innerWidth = window.innerWidth
+let innerWidth = window.innerWidth*0.8
 let innerHeight = window.innerHeight
 
 

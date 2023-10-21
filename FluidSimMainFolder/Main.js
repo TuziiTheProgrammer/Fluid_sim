@@ -4,6 +4,7 @@ const viewPos = document.querySelector("Position")
 const ctx = canvas.getContext("2d");
 const blurContext = blurCanvas.getContext('2d');
 
+let simWidth = window.innerWidth*0.8
 let gravitation = -0;
 let period = 0
 let initial_x;
@@ -53,12 +54,12 @@ canvas.addEventListener("click", event => {
 function main(){
 
 	///Statics
-	let CenterofAll = newVector(null, window.innerWidth/2, window.innerHeight/2)
+	let CenterofAll = newVector(null, simWidth/2, window.innerHeight/2)
 	
 	///Sets where they will spawn
 	for(let i = 0; i< ParticleAmount; i++){
 
-		let x = randomNumber(seed)*window.innerWidth/2
+		let x = randomNumber(seed)*simWidth/2
 		let y = randomNumber(seed)*window.innerHeight/2
 
 		PrePos[i] = newVector(null, x, y)
@@ -150,7 +151,7 @@ main()
 
 /////Funcitons Etc
 function setup(){
-	this.canvas.width  = window.innerWidth;
+	this.canvas.width  = simWidth;
 	this.canvas.height = window.innerHeight
 }
 function CollisionResponse(Particle){
@@ -164,9 +165,9 @@ function CollisionResponse(Particle){
 				}
 				current_Part.Force*=-1*current_Part.DampingRate
 			}
-			if(current_Part.Position.x > window.innerWidth/3 || current_Part.Position.x < 0){
-				if(current_Part.Position.x > window.innerWidth){
-					current_Part.Position.x = window.innerWidth
+			if(current_Part.Position.x > simWidth/3 || current_Part.Position.x < 0){
+				if(current_Part.Position.x > simWidth){
+					current_Part.Position.x = simWidth
 					
 				}else if(current_Part.Position.y < 100){
 					current_Part.Position.x = 1
