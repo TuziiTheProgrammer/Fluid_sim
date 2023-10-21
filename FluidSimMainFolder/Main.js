@@ -13,7 +13,7 @@ let initial_x;
 let initial_y;
 let Dist = 1000;
 let time = 60;
-let ParticleAmount = 250
+let ParticleAmount = 500
 let seed = 2
 let SmoothingRadius = 25
 let Mass = 30
@@ -57,6 +57,51 @@ canvas.addEventListener("mouseup", even =>{
 	MouseDown = false
 	MouseMoving = true
 })
+
+let rangeInputs = [
+	{id: "Gravitation", logic(value) {gravitation = value}, set(element){element.value = gravitation}},
+	{id: "Smoothing-Radius", logic(value) {SmoothingRadius = value}, set(element){element.value = SmoothingRadius}},
+	{id: "Mass", logic(value) {Mass = value}, set(element){element.value = Mass}},
+	{id: "TargetDensity", logic(value) {TargetDensity = value}, set(element){element.value = TargetDensity}},
+	{id: "Radius", logic(value) {radius_ = value}, set(element){element.value = radius_}},
+	{id: "Strength", logic(value) {Strength_ = value}, set(element){element.value = Strength_}},
+	{id: "Acceleration", logic(value) {Acceleration = value}, set(element){element.value = Acceleration}},
+	{id: "Particle-Amount", logic(value) {ParticleAmount = value}, set(element){element.value = ParticleAmount}}
+]
+
+setTimeout(()=> {
+	rangeInputs.forEach(input => {
+		let element = document.getElementById(input.id)
+		input.set(element)
+		element.addEventListener("change", e => input.logic(element.value))
+	})
+}, 0)
+
+
+// let grav = document.querySelector("#first-input")
+// grav.addEventListener("change", () => {
+// 	gravitation = grav.value
+// })
+
+// let smooth = document.querySelector("#second-input")
+// smooth.addEventListener("change", () => {
+// 	SmoothingRadius = smooth.value
+// })
+
+// let m = document.querySelector("#third-input")
+// m.addEventListener("change", () => {
+// 	Mass = m.value
+// })
+
+// let td = document.querySelector("#fourth-input")
+// td.addEventListener("change", () => {
+// 	TargetDensity = td.value
+// })
+
+// let radius = document.querySelector("#Radius")
+// td.addEventListener("change", () => {
+// 	TargetDensity = td.value
+// })
 
 
 function main(){
@@ -186,7 +231,7 @@ function InteractionForce(input, radius, strength, particleIndex, switch_){
 		let dst = Math.sqrt(sqrDIST)
 		let dirtoInp = dst <= Number.EPSILON ? newVector(null, 0, 0) : VectorScalarMultp(offset, switch_*1/dst)
 
-		console.log(dirtoInp)
+		// console.log(dirtoInp)
 
 		let center = 1-dst/radius
 
