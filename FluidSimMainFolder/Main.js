@@ -20,6 +20,7 @@ const blurContext = blurCanvas.getContext('2d');// also useless for now
 const worker = new Worker("worker.js") // useless and was a pain to use. with there was just proper multithreading
 
 
+
 let period = 0
 let initial_x;
 let initial_y;
@@ -69,14 +70,14 @@ let MouseDown = false
 let MouseMoving = false
 
 canvas.addEventListener("pointermove", event => {
-	wheremouseat = newVector(null, event.clientX, event.clientY)
+	wheremouseat = newVector(null, event.clientX-restWidth, event.clientY)
 	MouseMoving = true
    
 })
 canvas.addEventListener("mousedown", event =>{
 	MouseDown = true
 	MouseMoving = false
-	whereMouseHold = newVector(null, event.clientX, event.clientY)
+	whereMouseHold = newVector(null, event.clientX-restWidth, event.clientY)
 
 })
 canvas.addEventListener("mouseup", even =>{
@@ -88,12 +89,12 @@ canvas.addEventListener("mouseup", even =>{
 function main(){
 
 	///Statics
-	let CenterofAll = newVector(null, window.innerWidth/2, window.innerHeight/2)
+	let CenterofAll = newVector(null, simWidth/2, window.innerHeight/2)
 	
 	///Sets where they will spawn
 	for(let i = 0; i< ParticleAmount; i++){
 
-		let x = randomNumber(seed)*window.innerWidth/2
+		let x = randomNumber(seed)*simWidth/2
 		let y = randomNumber(seed)*window.innerHeight/2
 
 		PrePos[i] = newVector(null, x, y)
@@ -193,7 +194,7 @@ main()
 
 /////Funcitons Etc
 function setup(){
-	this.canvas.width  = window.innerWidth;
+	this.canvas.width  = simWidth;
 	this.canvas.height = window.innerHeight
 }
 function velocityColorGrad(particle){
@@ -279,9 +280,9 @@ function CollisionResponse(Particle){
 				}
 				current_Part.Force*=-1*current_Part.DampingRate
 			}
-			if(current_Part.Position.x > window.innerWidth || current_Part.Position.x < 0){
-				if(current_Part.Position.x > window.innerWidth){
-					current_Part.Position.x = window.innerWidth
+			if(current_Part.Position.x > simWidth || current_Part.Position.x < 0){
+				if(current_Part.Position.x > simWidth){
+					current_Part.Position.x = simWidth
 					
 				}else if(current_Part.Position.y < 100){
 					current_Part.Position.x = 1

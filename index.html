@@ -2,20 +2,46 @@
 	
 	body{
 		margin: 0;
-		width: 100vw;
-		height: 100vh;
+		padding: 0;
+		display: flex;
+		width: 100%;
+		height: 100%;
 		background-color: black;
 	}
 	#screen {
-		width:100%;
+		flex-basis: 80%;
 		height:100%;
 	}
 
+	#controls{
+		flex-basis: 20%;
+		height:100%;
+		color: #aaa;
+		font-family: monospace;
+		font-size: 20px;
+	}
 
 </style>
 <body>
 	<small id = "Position">--,--</small>
 </body>
+<div id="controls">
+	<label>yeet</label>
+	<br/>
+	<input id="first-input" type="range" min="0" max="1050" value="0" step="30"/>
+	<br/>
+	<label>yeet</label>
+	<br/>
+	<input id="second-input" type="range" min="0" max="1050" value="0" step="30"/>
+	<br/>
+	<label>yeet</label>
+	<br/>
+	<input id="third-input" type="range" min="0" max="1050" value="0" step="30"/>
+	<br/>
+	<label>yeet</label>
+	<br/>
+	<input id="fourth-input" type="range" min="0" max="1050" value="0" step="30"/>
+</div>
 <canvas id="screen"> </canvas>
 
 <script src="FluidSimMainFolder/ParticleClass.js"></script>
