@@ -20,7 +20,8 @@ const blurContext = blurCanvas.getContext('2d');// also useless for now
 const worker = new Worker("worker.js") // useless and was a pain to use. with there was just proper multithreading
 
 
-
+let simWidth = window.innerWidth*0.8
+let restWidth = window.innerWidth*0.2
 let period = 0
 let initial_x;
 let initial_y;
