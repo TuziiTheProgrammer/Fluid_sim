@@ -6,6 +6,7 @@ const blurContext = blurCanvas.getContext('2d');
 const worker = new Worker("worker.js")
 
 let simWidth = window.innerWidth*0.8
+let restWidth = window.innerWidth*0.2
 let gravitation = -0;
 let period = 0
 let initial_x;
@@ -40,7 +41,7 @@ let MouseDown = false
 let MouseMoving = false
 
 canvas.addEventListener("pointermove", event => {
-	wheremouseat = newVector(null, event.clientX, event.clientY)
+	wheremouseat = newVector(null, event.clientX-restWidth, event.clientY)
 	MouseMoving = true
    
 })
@@ -48,7 +49,7 @@ canvas.addEventListener("pointermove", event => {
 canvas.addEventListener("mousedown", event =>{
 	MouseDown = true
 	MouseMoving = false
-	whereMouseHold = newVector(null, event.clientX, event.clientY)
+	whereMouseHold = newVector(null, event.clientX-restWidth, event.clientY)
 
 })
 
@@ -256,7 +257,7 @@ function CollisionResponse(Particle){
 				}
 				current_Part.Force*=-1*current_Part.DampingRate
 			}
-			if(current_Part.Position.x > simWidth/3 || current_Part.Position.x < 0){
+			if(current_Part.Position.x > simWidth || current_Part.Position.x < 0){
 				if(current_Part.Position.x > simWidth){
 					current_Part.Position.x = simWidth
 					
