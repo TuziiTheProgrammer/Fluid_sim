@@ -1,15 +1,11 @@
 /*
 
 
-	Course: Interaction Design
-	University: Malmo university
-
+	
 	TITLE: Particle fluid simulation
 	MADE BY: JEREMIAH LASSEN-HOLM
 
-	If youre wondering why this doesnt look like the template its because I wasnt aware there was a template
-	and buildt everything from scratch. MY BAD!!!!
-
+	
 
 */
 const canvas = document.querySelector("#screen");
