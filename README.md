@@ -1,2 +1,2 @@
 # Fluid_sim
-Some project for school
+Some project
