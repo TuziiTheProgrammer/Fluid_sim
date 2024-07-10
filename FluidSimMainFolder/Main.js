@@ -27,7 +27,7 @@ let seed = 2
 
 ///TWEEKABLE THINGS    DO NOT TWEEK ANYTHING ELSE YOU WILL MESS UP THE CODE AND THE CONSOLE WILL SCREAM AT YOU :))))))))))
 let gravitation = -0;
-let ParticleAmount = 300
+let ParticleAmount = 500
 let SmoothingRadius = 25
 let Mass = 10
 let pressMul = 0.5
