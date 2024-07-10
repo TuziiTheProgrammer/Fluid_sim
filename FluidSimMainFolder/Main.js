@@ -156,7 +156,7 @@ function main(){
 			particle.TimeStep = timestep
 			particlePos[k] = particle.Position
 			
-			let VelocityInX = particle.ForceX + particle.Acceleration*particle.TimeStep*gravitation
+			let VelocityInX = particle.ForceX + particle.Acceleration*particle.TimeStep
 			let VelocityInY = particle.Force + particle.Acceleration*particle.TimeStep*gravitation
 			VelocityArr[k] = newVector(null, VelocityInX, VelocityInY)
 			particle.setVelocity(VelocityArr[k])
